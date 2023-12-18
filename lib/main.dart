@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mutify/ui/screens/home.dart';
+import 'package:mutify/ui/screens/song_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -14,7 +15,8 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       routes: {
-        '/home': (context) => Home()
+        '/home': (context) => Home(),
+        '/': (context) => SongScreen()
       },
       initialRoute: '/home',
       theme: ThemeData(
