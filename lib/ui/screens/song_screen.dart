@@ -27,6 +27,7 @@ class _SongPlayerState extends State<SongPlayer> {
 
     // Load the audio asset during initialization
     _audioPlayer.setUrl('https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3');
+    //song.trackUrl
     _audioPlayer.load();
   }
 
@@ -45,6 +46,7 @@ class _SongPlayerState extends State<SongPlayer> {
         // Display Image from Network URL
         Image.network(
           'https://i.scdn.co/image/ab67616d00001e02ff9ca10b55ce82ae553c8228',
+          //song.imageUrl
           fit: BoxFit.cover,
         ),
         Container(
@@ -72,7 +74,7 @@ class _SongPlayerState extends State<SongPlayer> {
               ),
               const SizedBox(height: 10),
               Text(
-                "song.description",
+                "song.Album",
                 maxLines: 2,
                 style: Theme.of(context)
                     .textTheme
