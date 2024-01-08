@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mutify/blocs/artist_cubit.dart';
+import 'package:mutify/blocs/playing_song_cubit.dart';
 import 'package:mutify/repositories/artist_repository.dart';
 import 'package:mutify/repositories/track_repository.dart';
 import 'package:mutify/ui/screens/home.dart';
@@ -24,12 +25,12 @@ void main() {
           providers: [
             BlocProvider<TrackCubit>(create: (_) => trackCubit),
             BlocProvider<ArtistCubit>(create: (_) => artistCubit),
+            BlocProvider<PlayingSongCubit>(create: (_) =>  PlayingSongCubit()),
           ],
         child: const MyApp(),
       )
   );
 }
-
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 

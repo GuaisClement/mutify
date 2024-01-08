@@ -1,20 +1,21 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:just_audio/just_audio.dart';
-import 'package:audio_manager/audio_manager.dart';
 
-
+import '../../blocs/playing_song_cubit.dart';
 
 class SongScreen extends StatelessWidget {
   final List<String> songUrls;
   final List<String> imageUrls;
+  final int indexSong;
 
-  SongScreen({required this.songUrls, required this.imageUrls});
+  SongScreen({required this.songUrls, required this.imageUrls, required this.indexSong});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SongPlayer(songUrls: songUrls, imageUrls: imageUrls),
+      body: SongPlayer(songUrls: songUrls, imageUrls: imageUrls, indexSong: indexSong),
     );
   }
 }
@@ -22,7 +23,8 @@ class SongScreen extends StatelessWidget {
 class SongPlayer extends StatefulWidget {
   final List<String> songUrls;
   final List<String> imageUrls;
-  SongPlayer({required this.songUrls, required this.imageUrls});
+  final int indexSong;
+  SongPlayer({required this.songUrls, required this.imageUrls, required this.indexSong});
 
   @override
   _SongPlayerState createState() => _SongPlayerState();
@@ -35,30 +37,40 @@ class _SongPlayerState extends State<SongPlayer> {
       StreamController<double>();
   late List<String> _songUrls;
   late List<String> _imageUrls; 
-  late List<String> songTitles; 
-  late List<String> albumTitles; 
+  late List<String> _songTitles; 
+  late List<String> _albumTitles; 
+  late int _indexSong;
 
   @override
   void initState() {
     super.initState();
     _songUrls = widget.songUrls;
     _imageUrls = widget.imageUrls;
-
+    // _songTitles = widget.imageUrls;
+    // _albumTitles = widget.albumTitles;
+    _indexSong = widget.indexSong;
+    print("_indexSong : $_indexSong");
+    
+    List<AudioSource> audioSources = [];
+    for (int i = 0; i < _songUrls.length; i++) {
+      if (_songUrls[i] == "not found") {
+        audioSources.add(AudioSource.uri(Uri.parse('fallback_uri'), tag: 'Fallback Song'));
+      } else {
+        audioSources.add(AudioSource.uri(Uri.parse(_songUrls[i]), tag: 'Song $i'));
+      }
+    }
     _audioPlayer.setAudioSource(
       ConcatenatingAudioSource(
         useLazyPreparation: true,
         shuffleOrder: DefaultShuffleOrder(),
-        children: [
-          for (int i = 0; i < _songUrls.length; i++)
-            AudioSource.uri(
-              Uri.parse(_songUrls[i]),
-            ),
-        ],
+        children: audioSources,
       ),
-      initialIndex: 0,
+      initialIndex: _indexSong,
       initialPosition: Duration.zero,
     );
+
     _audioPlayer.load();
+    BlocProvider.of<PlayingSongCubit>(context).updateIndexSong(_indexSong);
   }
 
   @override
@@ -70,19 +82,20 @@ class _SongPlayerState extends State<SongPlayer> {
 
   @override
   Widget build(BuildContext context) {
-    String currentImageUrl = _audioPlayer.currentIndex != null
-        ? _imageUrls[_audioPlayer.currentIndex!]
-        : 'https://i.scdn.co/image/ab67616d00001e02ff9ca10b55ce82ae553c8228';
-
+    
+    String currentImageUrl = _imageUrls[_indexSong] ?? 'https://i.scdn.co/image/ab67616d00001e02ff9ca10b55ce82ae553c8228'; //fall back image
+    
     return Stack(
       fit: StackFit.expand,
-      
+     
       children: [
-
-        Image.network(
-          currentImageUrl,
-          fit: BoxFit.cover,
-        ),
+         Container(
+          //margin: EdgeInsets.all(8.0),
+          child: Image(
+            image: NetworkImage(currentImageUrl),
+            fit: BoxFit.cover,
+          ),
+        ),        
 
         Container(
           decoration: BoxDecoration(
@@ -102,7 +115,7 @@ class _SongPlayerState extends State<SongPlayer> {
             children: [
               Text( //title
                 _audioPlayer.currentIndex != null
-                    ? songTitles[_audioPlayer.currentIndex!]
+                    ? _songTitles[_audioPlayer.currentIndex!]
                     : 'Fallback Title',
                 style: Theme.of(context).textTheme.headlineSmall!.copyWith(
                   color: Colors.white,
@@ -113,7 +126,7 @@ class _SongPlayerState extends State<SongPlayer> {
               const SizedBox(height: 10),
               Text( //album name
                 _audioPlayer.currentIndex != null
-                    ? albumTitles[_audioPlayer.currentIndex!]
+                    ? _albumTitles[_audioPlayer.currentIndex!]
                     : 'Fallback Album',
                 maxLines: 2,
                 style: Theme.of(context)
@@ -133,6 +146,10 @@ class _SongPlayerState extends State<SongPlayer> {
                     children: [
                       Text(
                         '${position.inMinutes}:${(position.inSeconds % 60).toString().padLeft(2, '0')} - ${duration.inMinutes}:${(duration.inSeconds % 60).toString().padLeft(2, '0')}',
+                        style: Theme.of(context).textTheme.headlineSmall!.copyWith(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                       Slider(
                         value: position.inSeconds.toDouble(),
@@ -224,9 +241,13 @@ class _SongPlayerState extends State<SongPlayer> {
                     stream: _audioPlayer.sequenceStateStream,
                     builder: (context, index) {
                       return IconButton(
-                        onPressed: _audioPlayer.hasNext
-                            ? _audioPlayer.seekToNext
-                            : null,
+                        onPressed: () {
+                          if (_audioPlayer.hasNext) {
+                            _audioPlayer.seekToNext();
+                            _indexSong += 1;
+                            print("_indexSong : $_indexSong");
+                          }
+                        },
                         iconSize: 45,
                         icon: const Icon(
                           Icons.skip_next,
