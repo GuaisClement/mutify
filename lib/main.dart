@@ -1,9 +1,33 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:mutify/blocs/artist_cubit.dart';
+import 'package:mutify/repositories/artist_repository.dart';
+import 'package:mutify/repositories/track_repository.dart';
 import 'package:mutify/ui/screens/home.dart';
-import 'package:mutify/ui/screens/song_screen.dart';
+import 'package:provider/provider.dart';
+
+import 'blocs/track_cubit.dart';
 
 void main() {
-  runApp(const MyApp());
+
+  WidgetsFlutterBinding.ensureInitialized();
+
+  final TrackCubit trackCubit = TrackCubit(TrackRepository());
+  final ArtistCubit artistCubit = ArtistCubit(ArtistRepository());
+
+  // Chargement des tracks et artists
+  trackCubit.loadTracks();
+  artistCubit.loadArtists();
+
+  runApp(
+      MultiProvider(
+          providers: [
+            BlocProvider<TrackCubit>(create: (_) => trackCubit),
+            BlocProvider<ArtistCubit>(create: (_) => artistCubit),
+          ],
+        child: const MyApp(),
+      )
+  );
 }
 
 class MyApp extends StatelessWidget {
