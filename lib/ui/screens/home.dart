@@ -1,6 +1,8 @@
 // home.dart
 
 import 'package:flutter/material.dart';
+
+import 'song_screen.dart';
 // Importez d'autres dépendances nécessaires
 
 class Home extends StatefulWidget {
@@ -42,10 +44,24 @@ class _HomePageState extends State<Home> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => SongScreen(
+                songUrls: const [
+                  "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
+                  "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3",
+                  "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3",
+                ],
+                imageUrls: [],
+              ),
+            ),
+          );
+        },
+        tooltip: 'button',
         child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+      ),
     );
   }
 }

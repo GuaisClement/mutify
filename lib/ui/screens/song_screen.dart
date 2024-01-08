@@ -1,33 +1,63 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:audio_manager/audio_manager.dart';
+
+
 
 class SongScreen extends StatelessWidget {
+  final List<String> songUrls;
+  final List<String> imageUrls;
+
+  SongScreen({required this.songUrls, required this.imageUrls});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SongPlayer(),
+      body: SongPlayer(songUrls: songUrls, imageUrls: imageUrls),
     );
   }
 }
 
 class SongPlayer extends StatefulWidget {
+  final List<String> songUrls;
+  final List<String> imageUrls;
+  SongPlayer({required this.songUrls, required this.imageUrls});
+
   @override
   _SongPlayerState createState() => _SongPlayerState();
 }
+
 
 class _SongPlayerState extends State<SongPlayer> {
   final AudioPlayer _audioPlayer = AudioPlayer();
   final StreamController<double> _dragPositionController =
       StreamController<double>();
+  late List<String> _songUrls;
+  late List<String> _imageUrls; 
+  late List<String> songTitles; 
+  late List<String> albumTitles; 
 
   @override
   void initState() {
     super.initState();
+    _songUrls = widget.songUrls;
+    _imageUrls = widget.imageUrls;
 
-    // Load the audio asset during initialization
-    _audioPlayer.setUrl('https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3');
-    //song.trackUrl
+    _audioPlayer.setAudioSource(
+      ConcatenatingAudioSource(
+        useLazyPreparation: true,
+        shuffleOrder: DefaultShuffleOrder(),
+        children: [
+          for (int i = 0; i < _songUrls.length; i++)
+            AudioSource.uri(
+              Uri.parse(_songUrls[i]),
+            ),
+        ],
+      ),
+      initialIndex: 0,
+      initialPosition: Duration.zero,
+    );
     _audioPlayer.load();
   }
 
@@ -40,15 +70,20 @@ class _SongPlayerState extends State<SongPlayer> {
 
   @override
   Widget build(BuildContext context) {
+    String currentImageUrl = _audioPlayer.currentIndex != null
+        ? _imageUrls[_audioPlayer.currentIndex!]
+        : 'https://i.scdn.co/image/ab67616d00001e02ff9ca10b55ce82ae553c8228';
+
     return Stack(
       fit: StackFit.expand,
+      
       children: [
-        // Display Image from Network URL
+
         Image.network(
-          'https://i.scdn.co/image/ab67616d00001e02ff9ca10b55ce82ae553c8228',
-          //song.imageUrl
+          currentImageUrl,
           fit: BoxFit.cover,
         ),
+
         Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
@@ -65,22 +100,28 @@ class _SongPlayerState extends State<SongPlayer> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(
-                "song.title",
+              Text( //title
+                _audioPlayer.currentIndex != null
+                    ? songTitles[_audioPlayer.currentIndex!]
+                    : 'Fallback Title',
                 style: Theme.of(context).textTheme.headlineSmall!.copyWith(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
+
               const SizedBox(height: 10),
-              Text(
-                "song.Album",
+              Text( //album name
+                _audioPlayer.currentIndex != null
+                    ? albumTitles[_audioPlayer.currentIndex!]
+                    : 'Fallback Album',
                 maxLines: 2,
                 style: Theme.of(context)
                     .textTheme
                     .bodySmall!
                     .copyWith(color: Colors.white),
               ),
+
               const SizedBox(height: 30),
               StreamBuilder<Duration>(
                 stream: _audioPlayer.positionStream,

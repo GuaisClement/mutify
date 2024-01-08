@@ -9,6 +9,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.11.0"
+  audio_manager:
+    dependency: "direct main"
+    description:
+      name: audio_manager
+      sha256: "6f26b61cc39e258619d0e1bc34500bb7f3926dcc4b6a8c7ea31b67c62381c931"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.8.2"
   audio_session:
     dependency: transitive
     description:
