@@ -36,7 +36,7 @@ class TrackRepository {
       if (prefs.containsKey('tracks')) {
         listJson = prefs.getStringList('tracks');
       } else {
-        print('La clé "companies" n\'existe pas dans les préférences.');
+        print('La clé "tracks" n\'existe pas dans les préférences.');
       }
 
       if (listJson != null) {

@@ -10,10 +10,6 @@ class TrackCubit extends Cubit<List<Track>> {
   TrackCubit(this.tracksRepository) : super([]);
 
   Future<void> loadTracks() async {
-    /*List<Track> tracks = [Track('0','Nouvelle', '', 'PLK', ''),
-                          Track('1','Décembre', '', 'PLK', ''),
-                          Track('2','Attentat', '', 'PLK', '')];*/
-
     List<Track> tracks = await tracksRepository.loadTracks();
     emit(tracks);
   }
