@@ -1,16 +1,31 @@
-# mutify
+# Mutify
 
-A new Flutter project.
+Appication Flutter qui permet de chercher des artistes et leurs musiques pour en écouter une partie
 
-## Getting Started
+## Pré-requis
 
-This project is a starting point for a Flutter application.
+Flutter : 3.13.9
 
-A few resources to get you started if this is your first Flutter project:
+## Installation
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+1. Cloner le projet
+2. utliser  la commande suivante pour installer les packages requis
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+'''bash
+flutter pub get
+'''
+
+## Fonctionnalités
+
+- Artiste :
+  - Rechercher un artiste
+  - Sauvegarder un artiste
+  - Supprimer un artiste
+- Titre :
+  - Rechercher un titre
+  - Sauvegarder un titre
+  - Supprimer un titre
+  - Jouer un titre :
+    - Se déplacer de titre en titre
+    - Mettre sur pause/play
+    - Aller à un moment donné d ela musique 
