@@ -80,8 +80,8 @@ class _SongPlayerState extends State<SongPlayer> {
           currentImageUrl = trackCubit.state[index].imageUrl;
           currentTitle = trackCubit.state[index].name;
           currentArtists = trackCubit.state[index].artists;
-          if (_audioPlayer.duration==null){
-            //showSnackbar('Song Preview Not Found');                                
+          if (trackCubit.state[index].previewUrl==""){
+            showSnackbar('Song Preview Not Found');                                
           }
         });
       }
@@ -199,7 +199,7 @@ class _SongPlayerState extends State<SongPlayer> {
                               _audioPlayer.seekToPrevious();                            
                               playingSongCubit.updateIndexSong(playingSongCubit.state.indexSong - 1);
                               if (_audioPlayer.duration==null){
-                                showSnackbar('Song Preview Not Found');                                
+                                //showSnackbar('Song Preview Not Found');                                
                               }
                             }
                           },
@@ -272,7 +272,7 @@ class _SongPlayerState extends State<SongPlayer> {
                               _audioPlayer.seekToNext();                            
                               playingSongCubit.updateIndexSong(playingSongCubit.state.indexSong + 1);  
                               if (_audioPlayer.duration==null){
-                                showSnackbar('Song Preview Not Found');                                
+                                //showSnackbar('Song Preview Not Found');                                
                               }
                               
                             }
