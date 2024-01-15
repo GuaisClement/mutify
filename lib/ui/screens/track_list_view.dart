@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:mutify/ui/screens/song_screen.dart';
 
+import '../../blocs/playing_song_cubit.dart';
 import '../../blocs/track_cubit.dart';
 import '../../models/track.dart';
 
 class TrackListView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final PlayingSongCubit playingSongCubit =BlocProvider.of<PlayingSongCubit>(context);
     return BlocBuilder<TrackCubit, List<Track>>(
       builder: (context, state) {
         return ListView.separated(
@@ -40,7 +43,17 @@ class TrackListView extends StatelessWidget {
                       IconButton(
                         icon: Icon(Icons.play_arrow),
                         color: Colors.white,
-                        onPressed: () {},
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(                          
+                              builder: (context) {
+                                playingSongCubit.updateIndexSong(index);
+                                return SongScreen();
+                              },
+                            ),
+                          );
+                        },
                       ),
                       IconButton(
                         icon: Icon(Icons.delete),
