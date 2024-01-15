@@ -11,9 +11,9 @@ Flutter : 3.13.9
 1. Cloner le projet
 2. utliser  la commande suivante pour installer les packages requis
 
-'''bash
+```bash
 flutter pub get
-'''
+```
 
 ## Fonctionnalités
 
