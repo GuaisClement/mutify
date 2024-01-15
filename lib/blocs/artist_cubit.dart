@@ -12,10 +12,6 @@ class ArtistCubit extends Cubit<List<Artist>> {
   ArtistCubit(this.artistsRepository) : super([]);
 
   Future<void> loadArtists() async {
-    /*List<Track> tracks = [Track('0','Nouvelle', '', 'PLK', ''),
-                          Track('1','Décembre', '', 'PLK', ''),
-                          Track('2','Attentat', '', 'PLK', '')];*/
-
     List<Artist> artists = await artistsRepository.loadArtists();
     emit(artists);
   }

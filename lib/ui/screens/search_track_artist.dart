@@ -58,66 +58,123 @@ class _SearchTrackArtistState extends State<SearchTrackArtist> {
               },
               decoration: InputDecoration(
                 hintText: _selectedSearchType == 'Titre' ? 'Rechercher une musique' : 'Rechecher un artiste',
-                prefixIcon: Icon(Icons.search),
+                prefixIcon: Icon(
+                    Icons.search,
+                    color: Colors.white),
+                hintStyle: TextStyle(color: Colors.white),
               ),
+              style: TextStyle(color: Colors.white),
             ),
           ),
           Container(
             height: 70,
-            child: DropdownButton<String>(
-              value: _selectedSearchType,
-              onChanged: (String? newValue) {
-                setState(() {
-                  _searchController.clear();
-                  _selectedSearchType = newValue ?? 'Titre';
-                });
-              },
-              items: <String>['Titre', 'Artiste']
-                  .map<DropdownMenuItem<String>>((String value) {
-                    return DropdownMenuItem<String>(
-                      value: value,
-                      child: Text(value),
-                    );
-                  }).toList(),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                InkWell(
+                  onTap: () {
+                    setState(() {
+                      _searchController.clear();
+                      _selectedSearchType = 'Titre';
+                    });
+                  },
+                  child: Row(
+                    children: [
+                      Radio(
+                        value: 'Titre',
+                        groupValue: _selectedSearchType,
+                        onChanged: (String? newValue) {
+                          // Aucune action nécessaire ici, car l'action est gérée par l'InkWell
+                        },
+                        activeColor: Colors.white, // Couleur du cercle du bouton radio quand il est sélectionné
+                      ),
+                      Text('Titre', style: TextStyle(color: Colors.white)),
+                    ],
+                  ),
+                ),
+                InkWell(
+                  onTap: () {
+                    setState(() {
+                      _searchController.clear();
+                      _selectedSearchType = 'Artiste';
+                    });
+                  },
+                  child: Row(
+                    children: [
+                      Radio(
+                        value: 'Artiste',
+                        groupValue: _selectedSearchType,
+                        onChanged: (String? newValue) {
+                          // Aucune action nécessaire ici, car l'action est gérée par l'InkWell
+                        },
+                        activeColor: Colors.white, // Couleur du cercle du bouton radio quand il est sélectionné
+                      ),
+                      Text('Artiste', style: TextStyle(color: Colors.white)),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ),
+
           _selectedSearchType == 'Titre'
               ? Expanded(
                 child: ListView.separated(
-                  itemCount: _tracks.length,
+                  itemCount: _tracks.length + 1,
                   itemBuilder: (BuildContext context, int index) {
-                    Track track = _tracks[index];
-                    return ListTile(
-                      leading: CircleAvatar(
-                      backgroundImage: track.imageUrl.isNotEmpty
-                          ? NetworkImage(track.imageUrl)
-                          : NetworkImage('assets/placeholder_track.webp') as ImageProvider, // Remplacez par une image de remplacement ou un espace réservé
-                      ),
-                      title: Text(
-                        track.name),
-                      subtitle: Text(track.artists),
-                      onTap: () {
-                        context.read<TrackCubit>().addTrack(track);
-                        _searchController.clear();
-                        showDialog(
-                          context: context,
-                          builder: (BuildContext context) {
-                            return AlertDialog(
-                              title: Text('Titre ajouté'),
-                              content: Text('Le titre a été ajouté à votre liste'),
-                              actions: <Widget>[
-                                TextButton(
-                                  onPressed: () {
-                                    Navigator.of(context).pop();
-                                  },
-                                  child: Text('OK'),
-                                ),
-                              ],
-                            );
-                          },
-                        );
-                      },
-                    );
+                    if (index < _tracks.length) {
+                      Track track = _tracks[index];
+                      return ListTile(
+                        leading: CircleAvatar(
+                          backgroundImage: track.imageUrl.isNotEmpty
+                              ? NetworkImage(track.imageUrl)
+                              : NetworkImage(
+                              'assets/placeholder_track.webp') as ImageProvider, // Remplacez par une image de remplacement ou un espace réservé
+                        ),
+                        title: Text(
+                          track.name,
+                          style: TextStyle(
+                            color: Colors.white, // Couleur du titre (blanc)
+                          ),
+                        ),
+                        subtitle: Text(
+                          track.artists,
+                          style: TextStyle(
+                            color: Colors
+                                .grey[500], // Couleur du sous-titre (blanc grisé)
+                          ),
+                        ),
+                        onTap: () {
+                          context.read<TrackCubit>().addTrack(track);
+                          _searchController.clear();
+                          showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return AlertDialog(
+                                title: Text('Titre ajouté'),
+                                content: Text(
+                                    'Le titre a été ajouté à votre liste'),
+                                actions: <Widget>[
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.of(context).pop();
+                                    },
+                                    child: Text('OK'),
+                                  ),
+                                ],
+                              );
+                            },
+                          );
+                        },
+                      );
+                    }else{
+                      // Ajouter le Container après le dernier ListTile
+                      return Container(
+                        height: 60.0,
+                        width: double.infinity,
+                        color: Colors.transparent,
+                      );
+                    }
                   },
                   separatorBuilder: (BuildContext context, int index) {
                     return const Divider(height: 0);
@@ -126,40 +183,54 @@ class _SearchTrackArtistState extends State<SearchTrackArtist> {
               )
               : Expanded(
             child: ListView.separated(
-              itemCount: _artists.length,
+              itemCount: _artists.length + 1,
               itemBuilder: (BuildContext context, int index) {
-                Artist artist = _artists[index];
-                return ListTile(
-                  leading: CircleAvatar(
-                    backgroundImage: artist.imageUrl.isNotEmpty
-                        ? NetworkImage(artist.imageUrl)
-                        : NetworkImage('assets/placeholder_track.webp') as ImageProvider, // Remplacez par une image de remplacement ou un espace réservé
-                  ),
-                  title: Text(
-                      artist.name),
-                  onTap: () {
-                    context.read<ArtistCubit>().addArtist(artist);
-                    _searchController.clear();
-                    showDialog(
-                      context: context,
-                      builder: (BuildContext context) {
-                        return AlertDialog(
-                          title: Text('Artiste ajouté'),
-                          content: Text('L\'artiste a été ajouté à votre liste'),
-                          actions: <Widget>[
-                            TextButton(
-                              onPressed: () {
-                                Navigator.of(context).pop();
-                              },
-                              child: Text('OK'),
-                            ),
-                          ],
-                        );
-                      },
-                    );
-
-                  },
-                );
+                if (index < _tracks.length) {
+                  Artist artist = _artists[index];
+                  return ListTile(
+                    leading: CircleAvatar(
+                      backgroundImage: artist.imageUrl.isNotEmpty
+                          ? NetworkImage(artist.imageUrl)
+                          : NetworkImage(
+                          'assets/placeholder_track.webp') as ImageProvider, // Remplacez par une image de remplacement ou un espace réservé
+                    ),
+                    title: Text(
+                        artist.name,
+                        style: TextStyle(
+                          color: Colors.white, // Couleur du titre (blanc)
+                        )
+                    ),
+                    onTap: () {
+                      context.read<ArtistCubit>().addArtist(artist);
+                      _searchController.clear();
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                            title: Text('Artiste ajouté'),
+                            content: Text(
+                                'L\'artiste a été ajouté à votre liste'),
+                            actions: <Widget>[
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                },
+                                child: Text('OK'),
+                              ),
+                            ],
+                          );
+                        },
+                      );
+                    },
+                  );
+                }else{
+                  // Ajouter le Container après le dernier ListTile
+                  return Container(
+                    height: 60.0,
+                    width: double.infinity,
+                    color: Colors.transparent,
+                  );
+                }
               },
               separatorBuilder: (BuildContext context, int index) {
                 return const Divider(height: 0);
