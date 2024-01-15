@@ -4,8 +4,8 @@ Appication Flutter qui permet de chercher des artistes et leurs musiques pour en
 
 ## Pré-requis
 
-Flutter : 3.13.9
-Dart : 3.1.5
+- Flutter : 3.13.9
+- Dart : 3.1.5
 
 ## Installation
 
