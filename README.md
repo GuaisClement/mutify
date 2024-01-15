@@ -17,6 +17,8 @@ flutter pub get
 
 ## Fonctionnalités
 
+- API : https://api.spotify.com
+
 - Artiste :
   - Rechercher un artiste
   - Sauvegarder un artiste

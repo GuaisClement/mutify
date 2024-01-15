@@ -185,7 +185,7 @@ class _SearchTrackArtistState extends State<SearchTrackArtist> {
             child: ListView.separated(
               itemCount: _artists.length + 1,
               itemBuilder: (BuildContext context, int index) {
-                if (index < _tracks.length) {
+                if (index < _artists.length) {
                   Artist artist = _artists[index];
                   return ListTile(
                     leading: CircleAvatar(
