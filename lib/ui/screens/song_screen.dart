@@ -4,99 +4,96 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:just_audio/just_audio.dart';
 
 import '../../blocs/playing_song_cubit.dart';
+import '../../blocs/track_cubit.dart';
 
 class SongScreen extends StatelessWidget {
-  final List<String> songUrls;
-  final List<String> imageUrls;
-  final int indexSong;
-
-  SongScreen({required this.songUrls, required this.imageUrls, required this.indexSong});
+  SongScreen();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SongPlayer(songUrls: songUrls, imageUrls: imageUrls, indexSong: indexSong),
+      body: SongPlayer(),
     );
   }
 }
 
 class SongPlayer extends StatefulWidget {
-  final List<String> songUrls;
-  final List<String> imageUrls;
-  final int indexSong;
-  SongPlayer({required this.songUrls, required this.imageUrls, required this.indexSong});
+  SongPlayer();
 
   @override
   _SongPlayerState createState() => _SongPlayerState();
 }
 
-
 class _SongPlayerState extends State<SongPlayer> {
   final AudioPlayer _audioPlayer = AudioPlayer();
   final StreamController<double> _dragPositionController =
       StreamController<double>();
-  late List<String> _songUrls;
-  late List<String> _imageUrls; 
-  late List<String> _songTitles; 
-  late List<String> _albumTitles; 
-  late int _indexSong;
+  final StreamController<String> _currentImageUrlController =
+      StreamController<String>();
+  final StreamController<String> _currentTitleController =
+      StreamController<String>();
+  final StreamController<String> _currentArtistsController =
+      StreamController<String>();
+
+  String currentImageUrl ='https://i.scdn.co/image/ab67616d00001e02ff9ca10b55ce82ae553c8228'; // fallback image
+  String currentTitle = '';
+  String currentArtists = '';
 
   @override
   void initState() {
     super.initState();
-    _songUrls = widget.songUrls;
-    _imageUrls = widget.imageUrls;
-    // _songTitles = widget.imageUrls;
-    // _albumTitles = widget.albumTitles;
-    _indexSong = widget.indexSong;
-    print("_indexSong : $_indexSong");
-    
+    final PlayingSongCubit playingSongCubit =
+        BlocProvider.of<PlayingSongCubit>(context);
+        
+    final TrackCubit trackCubit =BlocProvider.of<TrackCubit>(context);
+
+    // Set up the audio player with the cubit's current index
     List<AudioSource> audioSources = [];
-    for (int i = 0; i < _songUrls.length; i++) {
-      if (_songUrls[i] == "not found") {
-        audioSources.add(AudioSource.uri(Uri.parse('fallback_uri'), tag: 'Fallback Song'));
-      } else {
-        audioSources.add(AudioSource.uri(Uri.parse(_songUrls[i]), tag: 'Song $i'));
-      }
+    for (int i = 0; i < trackCubit.state.length; i++) {    
+      audioSources.add(AudioSource.uri(Uri.parse(trackCubit.state[i].previewUrl),
+          tag: 'Song $i'));      
     }
+
     _audioPlayer.setAudioSource(
       ConcatenatingAudioSource(
         useLazyPreparation: true,
         shuffleOrder: DefaultShuffleOrder(),
         children: audioSources,
       ),
-      initialIndex: _indexSong,
+      initialIndex: playingSongCubit.state.indexSong,
       initialPosition: Duration.zero,
     );
-
     _audioPlayer.load();
-    BlocProvider.of<PlayingSongCubit>(context).updateIndexSong(_indexSong);
+
+    _audioPlayer.currentIndexStream.listen((index) {
+  if (index != null && index < trackCubit.state.length) {
+    setState(() {
+      currentImageUrl = trackCubit.state[index].imageUrl;
+      currentTitle = trackCubit.state[index].name;
+      currentArtists = trackCubit.state[index].artists;
+    });
+  }
+});
   }
 
   @override
   void dispose() {
     _audioPlayer.dispose();
     _dragPositionController.close();
+    _currentImageUrlController.close();
+    _currentTitleController.close();
+    _currentArtistsController.close();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    
-    String currentImageUrl = _imageUrls[_indexSong] ?? 'https://i.scdn.co/image/ab67616d00001e02ff9ca10b55ce82ae553c8228'; //fall back image
+    final PlayingSongCubit playingSongCubit =BlocProvider.of<PlayingSongCubit>(context);
+    final TrackCubit trackCubit =BlocProvider.of<TrackCubit>(context);
     
     return Stack(
-      fit: StackFit.expand,
-     
+      fit: StackFit.expand,     
       children: [
-         Container(
-          //margin: EdgeInsets.all(8.0),
-          child: Image(
-            image: NetworkImage(currentImageUrl),
-            fit: BoxFit.cover,
-          ),
-        ),        
-
         Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
@@ -108,15 +105,17 @@ class _SongPlayerState extends State<SongPlayer> {
               ],
             ),
           ),
+          child: Image(
+            image: NetworkImage(currentImageUrl),
+            fit: BoxFit.cover,
+          ),
         ),
         Positioned.fill(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text( //title
-                _audioPlayer.currentIndex != null
-                    ? _songTitles[_audioPlayer.currentIndex!]
-                    : 'Fallback Title',
+                currentTitle,
                 style: Theme.of(context).textTheme.headlineSmall!.copyWith(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
@@ -125,9 +124,7 @@ class _SongPlayerState extends State<SongPlayer> {
 
               const SizedBox(height: 10),
               Text( //album name
-                _audioPlayer.currentIndex != null
-                    ? _albumTitles[_audioPlayer.currentIndex!]
-                    : 'Fallback Album',
+                currentArtists,
                 maxLines: 2,
                 style: Theme.of(context)
                     .textTheme
@@ -173,10 +170,13 @@ class _SongPlayerState extends State<SongPlayer> {
                   StreamBuilder<SequenceState?>(
                     stream: _audioPlayer.sequenceStateStream,
                     builder: (context, index) {
-                      return IconButton(
-                        onPressed: _audioPlayer.hasPrevious
-                            ? _audioPlayer.seekToPrevious
-                            : null,
+                      return IconButton(                        
+                        onPressed: () {
+                          if (playingSongCubit.state.indexSong>0) {
+                            _audioPlayer.seekToPrevious();                            
+                            playingSongCubit.updateIndexSong(playingSongCubit.state.indexSong - 1);
+                          }
+                        },
                         iconSize: 45,
                         icon: const Icon(
                           Icons.skip_previous,
@@ -242,10 +242,10 @@ class _SongPlayerState extends State<SongPlayer> {
                     builder: (context, index) {
                       return IconButton(
                         onPressed: () {
-                          if (_audioPlayer.hasNext) {
-                            _audioPlayer.seekToNext();
-                            _indexSong += 1;
-                            print("_indexSong : $_indexSong");
+                          if (playingSongCubit.state.indexSong<trackCubit.state.length-1) {
+                            _audioPlayer.seekToNext();                            
+                            playingSongCubit.updateIndexSong(playingSongCubit.state.indexSong + 1);
+                            
                           }
                         },
                         iconSize: 45,

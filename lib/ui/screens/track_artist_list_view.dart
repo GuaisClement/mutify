@@ -1,26 +1,19 @@
 // company_list_view.dart
 
-import 'dart:html';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mutify/ui/screens/song_screen.dart';
 
+import '../../blocs/playing_song_cubit.dart';
 import '../../blocs/track_cubit.dart';
 import '../../models/track.dart';
 
 class TrackListView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final PlayingSongCubit playingSongCubit =BlocProvider.of<PlayingSongCubit>(context);
     return BlocBuilder<TrackCubit, List<Track>>(
       builder: (context, state) {
-        List<String> imageUrls = state.map((track) => track.imageUrl).toList();
-        List<String> songUrls = state.map((track) {
-          // Check if previewUrl is not null or empty, otherwise set it to "not found"
-          return (track.previewUrl != null && track.previewUrl.isNotEmpty)
-              ? track.previewUrl
-              : "not found";
-        }).toList();
 
         return ListView.separated(
           itemCount: state.length,
@@ -45,12 +38,9 @@ class TrackListView extends StatelessWidget {
                       Navigator.push(
                         context,
                         MaterialPageRoute(                          
-                          builder: (context) {                           
-                            return SongScreen(
-                              songUrls: songUrls,
-                              imageUrls: imageUrls,
-                              indexSong: index ,
-                            );                            
+                          builder: (context) {
+                            playingSongCubit.updateIndexSong(index);
+                            return SongScreen();
                           },
                         ),
                       );
