@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ffi';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:just_audio/just_audio.dart';
@@ -44,6 +45,7 @@ class _SongPlayerState extends State<SongPlayer> {
       SnackBar(
         content: Text(message),
         duration: Duration(seconds: 2),
+        backgroundColor: Colors.redAccent,
       ),
     );
   }
@@ -60,7 +62,7 @@ class _SongPlayerState extends State<SongPlayer> {
     List<AudioSource> audioSources = [];
     for (int i = 0; i < trackCubit.state.length; i++) {    
       audioSources.add(AudioSource.uri(Uri.parse(trackCubit.state[i].previewUrl),
-          tag: 'Song $i'));      
+          tag: 'Song $i'));
     }
 
     _audioPlayer.setAudioSource(
@@ -70,7 +72,7 @@ class _SongPlayerState extends State<SongPlayer> {
         children: audioSources,
       ),
       initialIndex: playingSongCubit.state.indexSong,
-      initialPosition: Duration.zero,
+      initialPosition: Duration.zero,      
     );
     _audioPlayer.load();
 
@@ -80,8 +82,10 @@ class _SongPlayerState extends State<SongPlayer> {
           currentImageUrl = trackCubit.state[index].imageUrl;
           currentTitle = trackCubit.state[index].name;
           currentArtists = trackCubit.state[index].artists;
+          print("trackCubit.state[index].previewUrl : ");
+          print(trackCubit.state[index].previewUrl);
           if (trackCubit.state[index].previewUrl==""){
-            showSnackbar('Song Preview Not Found');                                
+            showSnackbar('Song Preview Not Found');
           }
         });
       }
@@ -161,8 +165,7 @@ class _SongPlayerState extends State<SongPlayer> {
                   stream: _audioPlayer.positionStream,
                   builder: (context, snapshot) {
                     final Duration position = snapshot.data ?? Duration.zero;
-                    final Duration duration =
-                        _audioPlayer.duration ?? Duration.zero;
+                    final Duration duration = _audioPlayer.duration ?? Duration.zero;
                     return Column(
                       children: [
                         Text(
@@ -198,9 +201,6 @@ class _SongPlayerState extends State<SongPlayer> {
                             if (playingSongCubit.state.indexSong>0) {
                               _audioPlayer.seekToPrevious();                            
                               playingSongCubit.updateIndexSong(playingSongCubit.state.indexSong - 1);
-                              if (_audioPlayer.duration==null){
-                                //showSnackbar('Song Preview Not Found');                                
-                              }
                             }
                           },
                           iconSize: 45,
@@ -218,8 +218,7 @@ class _SongPlayerState extends State<SongPlayer> {
                           final playerState = snapshot.data;
                           final processingState = playerState!.processingState;
 
-                          if (processingState == ProcessingState.loading ||
-                              processingState == ProcessingState.buffering) {
+                          if (processingState == ProcessingState.loading || processingState == ProcessingState.buffering) {
                             return Container(
                               width: 64.0,
                               height: 64.0,
@@ -268,13 +267,9 @@ class _SongPlayerState extends State<SongPlayer> {
                       builder: (context, index) {
                         return IconButton(
                           onPressed: () {
-                            if (playingSongCubit.state.indexSong<trackCubit.state.length-1) {                              
+                            if (playingSongCubit.state.indexSong<trackCubit.state.length-1) {
                               _audioPlayer.seekToNext();                            
-                              playingSongCubit.updateIndexSong(playingSongCubit.state.indexSong + 1);  
-                              if (_audioPlayer.duration==null){
-                                //showSnackbar('Song Preview Not Found');                                
-                              }
-                              
+                              playingSongCubit.updateIndexSong(playingSongCubit.state.indexSong + 1);
                             }
                           },
                           iconSize: 45,
